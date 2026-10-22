@@ -1,0 +1,36 @@
+name: CI/CD Zabbix Infra
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  validar-sintaxis:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Descargar el código
+        uses: actions/checkout@v4
+
+      - name: Validar sintaxis del docker-compose (Zabbix)
+        run: docker compose -f docker-compose-zabbix.yml config --quiet
+
+      - name: Validar sintaxis del docker-compose (Grafana)
+        run: docker compose -f docker-compose-grafana.yml config --quiet
+
+  escanear-vulnerabilidades:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Descargar el código
+        uses: actions/checkout@v4
+
+      - name: Escanear imágenes con Trivy (DevSecOps)
+        uses: aquasecurity/trivy-action@master
+        with:
+          image-ref: 'zabbix/zabbix-server-pgsql:alpine-7.4-latest'
+          format: 'table'
+          exit-code: '1' # Si encuentra vulnerabilidades CRÍTICAS, el pipeline falla
+          ignore-unfixed: true
+          vuln-type: 'os,library'
+          severity: 'CRITICAL'
