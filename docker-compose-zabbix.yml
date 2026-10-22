@@ -2,7 +2,7 @@ version: '3.5'
 
 services:
   postgres-server:
-     postgres:13
+    image: postgres:13
     container_name: zabbix-postgres
     environment:
       - POSTGRES_USER=zabbix
